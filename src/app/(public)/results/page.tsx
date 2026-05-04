@@ -1,10 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Bot, Star } from "lucide-react";
-import { EXPERT_RESULTS } from "@/lib/public-data";
+import { fetchExperts, type Expert } from "@/lib/data-fetcher";
+import { useAuth } from "@/lib/auth-context";
+import SmsAuthModal from "@/components/SmsAuthModal";
 
 export default function ResultsPage() {
+  const router = useRouter();
+  const { verified } = useAuth();
+  const [showAuth, setShowAuth] = useState(false);
+  const [pendingTarget, setPendingTarget] = useState("");
+  const [experts, setExperts] = useState<Expert[]>([]);
+
+  useEffect(() => {
+    fetchExperts().then(setExperts);
+  }, []);
+
+  const handleProtectedAction = (href: string) => {
+    if (verified) {
+      router.push(href);
+    } else {
+      setPendingTarget(href);
+      setShowAuth(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-surface-secondary">
       <header className="bg-white border-b border-border">
@@ -29,13 +52,16 @@ export default function ResultsPage() {
             ご相談内容から、<strong>税理士</strong>と<strong>司法書士</strong>のチーム編成をおすすめします。
             確定申告と法人登記を並行して進めることで、効率的に対応できます。
           </p>
-          <button className="mt-4 inline-flex items-center rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-white hover:bg-accent-hover transition-colors">
+          <button
+            onClick={() => handleProtectedAction("/chat")}
+            className="mt-4 inline-flex items-center rounded-lg bg-accent px-5 py-2 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
+          >
             このチームに相談する
           </button>
         </div>
 
         <div className="space-y-4">
-          {EXPERT_RESULTS.map((e) => (
+          {experts.map((e) => (
             <div key={e.id} className="bg-white rounded-xl border border-border p-6 hover:shadow-md transition-shadow">
               <div className="flex items-start gap-4">
                 <div className="h-14 w-14 rounded-xl bg-accent-light flex items-center justify-center shrink-0">
@@ -66,17 +92,28 @@ export default function ResultsPage() {
                     ))}
                   </div>
                 </div>
-                <Link
-                  href={`/profile/${e.id}`}
+                <button
+                  onClick={() => handleProtectedAction(`/profile/${e.id}`)}
                   className="shrink-0 inline-flex items-center rounded-lg border border-accent text-accent px-4 py-2 text-sm font-medium hover:bg-accent hover:text-white transition-colors"
                 >
                   詳細を見る
-                </Link>
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      <SmsAuthModal
+        open={showAuth}
+        onClose={() => setShowAuth(false)}
+        onSuccess={() => {
+          setShowAuth(false);
+          if (pendingTarget) {
+            router.push(pendingTarget);
+          }
+        }}
+      />
     </div>
   );
 }

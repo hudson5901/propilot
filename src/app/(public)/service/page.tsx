@@ -1,12 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
-import { SERVICES } from "@/lib/public-data";
+import { fetchServices, type Service } from "@/lib/data-fetcher";
 
 export default function ServicePage() {
   const [selected, setSelected] = useState<string | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    fetchServices().then(setServices);
+  }, []);
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -24,7 +29,7 @@ export default function ServicePage() {
 
       <div className="mx-auto max-w-5xl px-6 py-8">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {SERVICES.map((s) => (
+          {services.map((s) => (
             <button
               key={s.id}
               onClick={() => setSelected(selected === s.id ? null : s.id)}
@@ -66,7 +71,7 @@ export default function ServicePage() {
               href="/preferences"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-accent/25 hover:bg-accent-hover transition-all"
             >
-              次へ: 詳細を入力する
+              次へ: AIにヒアリングしてもらう
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>

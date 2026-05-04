@@ -1,13 +1,72 @@
 "use client";
 
 import Link from "next/link";
-import { use } from "react";
-import { Calculator, Star, Check, Heart, MapPin } from "lucide-react";
-import { DEMO_EXPERT } from "@/lib/public-data";
+import { use, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Star, Check, Heart, MapPin, Lock } from "lucide-react";
+import { fetchExpertById, type Expert } from "@/lib/data-fetcher";
+import { useAuth } from "@/lib/auth-context";
+import SmsAuthModal from "@/components/SmsAuthModal";
 
 export default function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const expert = DEMO_EXPERT;
+  const router = useRouter();
+  const { verified } = useAuth();
+  const [showAuth, setShowAuth] = useState(!verified);
+  const [expert, setExpert] = useState<Expert | null>(null);
+
+  useEffect(() => {
+    fetchExpertById(id).then(setExpert);
+  }, [id]);
+
+  // Show auth gate if not verified
+  if (!verified) {
+    return (
+      <div className="min-h-screen bg-surface-secondary">
+        <header className="bg-white border-b border-border">
+          <div className="mx-auto max-w-4xl px-6 py-8">
+            <Link href="/results" className="text-sm text-accent hover:underline mb-4 inline-block">
+              &larr; マッチング結果に戻る
+            </Link>
+          </div>
+        </header>
+
+        <div className="mx-auto max-w-4xl px-6 py-16">
+          <div className="bg-white rounded-2xl border border-border p-12 text-center">
+            <div className="mx-auto h-16 w-16 rounded-full bg-accent-light flex items-center justify-center mb-6">
+              <Lock className="h-7 w-7 text-accent" />
+            </div>
+            <h2 className="text-xl font-bold text-fg-primary">
+              専門家の詳細を見るには認証が必要です
+            </h2>
+            <p className="text-sm text-fg-secondary mt-2 max-w-md mx-auto">
+              マッチングの品質を保つため、SMS認証をお願いしています。電話番号が専門家に公開されることはありません。
+            </p>
+            <button
+              onClick={() => setShowAuth(true)}
+              className="mt-6 inline-flex items-center rounded-xl bg-accent px-8 py-3 text-sm font-semibold text-white hover:bg-accent-hover transition-colors"
+            >
+              電話番号で認証する
+            </button>
+          </div>
+        </div>
+
+        <SmsAuthModal
+          open={showAuth}
+          onClose={() => router.push("/results")}
+          onSuccess={() => setShowAuth(false)}
+        />
+      </div>
+    );
+  }
+
+  if (!expert) {
+    return (
+      <div className="min-h-screen bg-surface-secondary flex items-center justify-center">
+        <p className="text-fg-muted">読み込み中...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface-secondary">
@@ -23,7 +82,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
         <div className="bg-white rounded-xl border border-border p-8">
           <div className="flex items-start gap-6">
             <div className="h-20 w-20 rounded-2xl bg-accent-light flex items-center justify-center shrink-0">
-              <Calculator className="h-9 w-9 text-accent" />
+              <expert.Icon className={`h-9 w-9 ${expert.iconColor}`} />
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
@@ -55,20 +114,22 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-6">
-          <div className="bg-white rounded-xl border border-border p-6 text-center">
-            <p className="text-2xl font-bold text-accent">{expert.stats.cases}+</p>
-            <p className="text-xs text-fg-muted mt-1">対応実績</p>
+        {expert.stats && (
+          <div className="grid md:grid-cols-3 gap-6 mt-6">
+            <div className="bg-white rounded-xl border border-border p-6 text-center">
+              <p className="text-2xl font-bold text-accent">{expert.stats.cases}+</p>
+              <p className="text-xs text-fg-muted mt-1">対応実績</p>
+            </div>
+            <div className="bg-white rounded-xl border border-border p-6 text-center">
+              <p className="text-2xl font-bold text-accent">{expert.stats.repeatRate}</p>
+              <p className="text-xs text-fg-muted mt-1">リピート率</p>
+            </div>
+            <div className="bg-white rounded-xl border border-border p-6 text-center">
+              <p className="text-2xl font-bold text-accent">{expert.stats.avgResponse}</p>
+              <p className="text-xs text-fg-muted mt-1">平均レスポンス</p>
+            </div>
           </div>
-          <div className="bg-white rounded-xl border border-border p-6 text-center">
-            <p className="text-2xl font-bold text-accent">{expert.stats.repeatRate}</p>
-            <p className="text-xs text-fg-muted mt-1">リピート率</p>
-          </div>
-          <div className="bg-white rounded-xl border border-border p-6 text-center">
-            <p className="text-2xl font-bold text-accent">{expert.stats.avgResponse}</p>
-            <p className="text-xs text-fg-muted mt-1">平均レスポンス</p>
-          </div>
-        </div>
+        )}
 
         <div className="grid md:grid-cols-2 gap-6 mt-6">
           <div className="bg-white rounded-xl border border-border p-6">
@@ -92,6 +153,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
           </div>
         </div>
 
+        {expert.reviews_list && expert.reviews_list.length > 0 && (
         <div className="bg-white rounded-xl border border-border p-6 mt-6">
           <h2 className="text-base font-bold text-fg-primary mb-4">レビュー</h2>
           <div className="space-y-4">
@@ -111,6 +173,7 @@ export default function ProfilePage({ params }: { params: Promise<{ id: string }
             ))}
           </div>
         </div>
+        )}
 
         <span className="hidden">{id}</span>
       </div>
