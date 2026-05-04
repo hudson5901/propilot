@@ -1,65 +1,718 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  Calculator,
+  Building,
+  Scale,
+  ShieldCheck,
+  FilePen,
+  Lock,
+  BadgeCheck,
+  Shield,
+  Check,
+  Star,
+  ArrowRight,
+  ArrowDown,
+  Phone,
+  type LucideIcon,
+} from "lucide-react";
+import type { ReactNode } from "react";
 
+/* ─── icon helpers ─── */
+type ProfDef = {
+  label: string;
+  Icon: LucideIcon;
+  color: string;
+  bg: string;
+};
+
+const PROF: ProfDef[] = [
+  { label: "税理士", Icon: Calculator, color: "text-accent", bg: "bg-[#DBEAFE]" },
+  { label: "司法書士", Icon: Building, color: "text-success", bg: "bg-[#F0FDF4]" },
+  { label: "弁護士", Icon: Scale, color: "text-warning", bg: "bg-[#FEF3C7]" },
+  { label: "社労士", Icon: ShieldCheck, color: "text-[#DB2777]", bg: "bg-[#FCE7F3]" },
+  { label: "行政書士", Icon: FilePen, color: "text-[#7C3AED]", bg: "bg-[#EDE9FE]" },
+];
+
+/* ─── data ─── */
+const PAIN_CARDS: {
+  quote: string;
+  solution: string;
+  tags: { label: string; Icon: LucideIcon; color: string }[];
+}[] = [
+  {
+    quote: "「会社を設立したいけど\n何から始めればいい？」",
+    solution: "税理士 + 司法書士 + 社労士が\n連携してワンストップで対応",
+    tags: [
+      { label: "税理士", Icon: Calculator, color: "text-accent" },
+      { label: "司法書士", Icon: Building, color: "text-success" },
+      { label: "社労士", Icon: ShieldCheck, color: "text-[#DB2777]" },
+    ],
+  },
+  {
+    quote: "「確定申告の書類、\n何を出せばいいかわからない」",
+    solution: "AIが状況をヒアリングし\n最適な税理士を即マッチング",
+    tags: [{ label: "税理士", Icon: Calculator, color: "text-accent" }],
+  },
+  {
+    quote: "「契約トラブル、\nどの専門家に相談すれば？」",
+    solution: "弁護士 + 行政書士が連携し\nワンストップで解決",
+    tags: [
+      { label: "弁護士", Icon: Scale, color: "text-warning" },
+      { label: "行政書士", Icon: FilePen, color: "text-[#7C3AED]" },
+    ],
+  },
+];
+
+const STATS = [
+  { value: "5,000+", label: "登録専門家" },
+  { value: "3,200+", label: "マッチング実績" },
+  { value: "98%", label: "満足度" },
+  { value: "30秒", label: "平均マッチング" },
+];
+
+const CATEGORIES: {
+  Icon: LucideIcon;
+  iconColor: string;
+  title: string;
+  desc: string;
+  experts: string;
+}[] = [
+  {
+    Icon: Calculator,
+    iconColor: "text-accent",
+    title: "確定申告・税務",
+    desc: "個人・法人の確定申告、節税対策、税務調査対応",
+    experts: "税理士",
+  },
+  {
+    Icon: Building,
+    iconColor: "text-success",
+    title: "法人設立・登記",
+    desc: "会社設立、役員変更、本店移転、各種登記手続き",
+    experts: "司法書士",
+  },
+  {
+    Icon: Scale,
+    iconColor: "text-warning",
+    title: "契約・法務",
+    desc: "契約書作成・レビュー、紛争解決、法律相談",
+    experts: "弁護士",
+  },
+  {
+    Icon: ShieldCheck,
+    iconColor: "text-[#DB2777]",
+    title: "労務・社会保険",
+    desc: "就業規則、給与計算、社会保険手続き、助成金",
+    experts: "社労士",
+  },
+  {
+    Icon: FilePen,
+    iconColor: "text-[#7C3AED]",
+    title: "許認可・届出",
+    desc: "建設業許可、飲食店営業許可、各種届出書類",
+    experts: "行政書士",
+  },
+  {
+    Icon: Calculator,
+    iconColor: "text-accent",
+    title: "相続・遺産",
+    desc: "相続税申告、遺産分割、遺言書作成、名義変更",
+    experts: "税理士 × 司法書士",
+  },
+];
+
+const STEPS = [
+  { num: "1", title: "AIにヒアリング", desc: "相談内容を入力するだけで\nAIが必要なタスクを自動分解" },
+  { num: "2", title: "最適チーム編成", desc: "5,000名以上の専門家から\n最適なチームをAIが提案" },
+  { num: "3", title: "個別に契約", desc: "各専門家と直接・個別に契約\n電子署名で簡単に締結" },
+  { num: "4", title: "ダッシュボードで管理", desc: "全専門家の進捗を一元管理\nAIが次のアクションをリマインド" },
+];
+
+const PROFESSIONALS = PROF.map((p, i) => ({
+  ...p,
+  desc: [
+    "確定申告・法人税\n相続税・節税対策",
+    "法人登記・不動産登記\n名義変更・定款作成",
+    "契約書作成・紛争解決\n遺産分割・債務整理",
+    "社会保険・労務管理\n就業規則・助成金申請",
+    "許認可申請・届出\nビザ申請・事業許可",
+  ][i],
+}));
+
+const COMPARISON = [
+  { feature: "対応可能な専門分野", propilot: "5職種対応", others: "1〜2職種" },
+  { feature: "チーム編成", propilot: "AIが自動", others: "自分で探す" },
+  { feature: "マッチング時間", propilot: "最短30秒", others: "数日〜数週間" },
+  { feature: "専門家間の連携", propilot: "チームで一括", others: "個別にやり取り" },
+  { feature: "進捗管理", propilot: "ダッシュボード", others: "メール/電話" },
+  { feature: "料金", propilot: "マッチング無料", others: "紹介料あり" },
+];
+
+const TESTIMONIALS = [
+  {
+    text: "起業時に税理士と司法書士を別々に探すつもりでしたが、ProPilotで同時にマッチング。連携もスムーズで、1ヶ月で会社設立が完了しました。",
+    name: "田中 太郎",
+    role: "IT企業 代表取締役",
+    rating: 5,
+  },
+  {
+    text: "相続で揉めていた案件を、弁護士と税理士のチームが見事に解決。専門家同士が直接やり取りしてくれるので、こちらの負担が激減しました。",
+    name: "佐藤 花子",
+    role: "個人事業主",
+    rating: 5,
+  },
+  {
+    text: "従業員10人の採用に伴う労務手続きを社労士と行政書士のチームに一括依頼。書類ミスもゼロで、本業に集中できました。",
+    name: "鈴木 一郎",
+    role: "飲食店オーナー",
+    rating: 5,
+  },
+];
+
+const FAQ_ITEMS = [
+  {
+    q: "本当に無料ですか？",
+    a: "マッチングは完全無料です。専門家への報酬は、ご依頼内容に応じて専門家から直接お見積りが提示されます。ProPilotが仲介手数料を上乗せすることはありません。",
+  },
+  {
+    q: "どんな課題に対応できますか？",
+    a: "税務・法務・労務・登記・許認可の5分野をカバー。複数の分野にまたがる複合的な課題（例：起業、相続、M&Aなど）にも、チーム編成で対応できます。",
+  },
+  {
+    q: "AIがチームを組むって、大丈夫ですか？",
+    a: "AIは過去のマッチングデータ・専門家の得意分野・評価をもとに最適な組み合わせを提案します。最終的な依頼はお客様ご自身で判断いただけます。",
+  },
+  {
+    q: "専門家とのやり取りはどうしますか？",
+    a: "ProPilot上のチャット機能で専門家チーム全員と一括でやり取りが可能です。書類の受け渡しもプラットフォーム上で完結します。",
+  },
+  {
+    q: "途中でキャンセルできますか？",
+    a: "正式な契約前であれば、いつでも無料でキャンセル可能です。専門家との相性が合わない場合は、再マッチングも承ります。",
+  },
+];
+
+const PRICING_PLANS = [
+  {
+    name: "フリー",
+    price: "¥0",
+    period: "",
+    desc: "まずは気軽にお試し",
+    features: ["AIマッチング 月3回", "基本チャット機能", "専門家プロフィール閲覧"],
+    cta: "無料で始める",
+    highlighted: false,
+  },
+  {
+    name: "スタンダード",
+    price: "¥2,980",
+    period: "/月",
+    desc: "個人事業主・フリーランスに",
+    features: ["AIマッチング 無制限", "優先マッチング", "書類管理機能", "AI相談チャット", "進捗ダッシュボード"],
+    cta: "14日間無料体験",
+    highlighted: true,
+  },
+  {
+    name: "ビジネス",
+    price: "¥9,800",
+    period: "/月",
+    desc: "法人・複数案件の管理に",
+    features: ["スタンダード全機能", "専任アカウントマネージャー", "複数プロジェクト管理", "チーム共有機能", "API連携", "優先サポート"],
+    cta: "お問い合わせ",
+    highlighted: false,
+  },
+];
+
+const TRUST_ITEMS: { Icon: LucideIcon; text: string }[] = [
+  { Icon: ShieldCheck, text: "厳選された専門家のみ" },
+  { Icon: BadgeCheck, text: "資格確認済み" },
+  { Icon: Lock, text: "SSL暗号化通信" },
+  { Icon: Shield, text: "個人情報保護方針準拠" },
+  { Icon: Phone, text: "カスタマーサポート対応" },
+];
+
+const SECURITY_CARDS: {
+  Icon: LucideIcon;
+  iconColor: string;
+  iconBg: string;
+  cardBg: string;
+  title: string;
+  desc: string;
+}[] = [
+  {
+    Icon: Lock,
+    iconColor: "text-[#93C5FD]",
+    iconBg: "bg-[#1E40AF]",
+    cardBg: "bg-[#1E293B]",
+    title: "SSL暗号化通信",
+    desc: "全ての通信は256bit SSL暗号化で保護。個人情報は厳重に管理しています。",
+  },
+  {
+    Icon: BadgeCheck,
+    iconColor: "text-[#6EE7B7]",
+    iconBg: "bg-[#065F46]",
+    cardBg: "bg-[#1E293B]",
+    title: "資格認証済み専門家",
+    desc: "登録専門家は全員、資格証明書の提出と本人確認を完了。信頼できる専門家のみが参画しています。",
+  },
+  {
+    Icon: Shield,
+    iconColor: "text-[#FCA5A5]",
+    iconBg: "bg-[#7C2D12]",
+    cardBg: "bg-[#1E293B]",
+    title: "個別直接契約",
+    desc: "各専門家との契約はすべて直接個別契約。非弁行為に該当しない安心の仕組みです。",
+  },
+];
+
+/* ─── page ─── */
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <>
+      {/* ── Nav ── */}
+      <nav className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-lg border-b border-border">
+        <div className="mx-auto max-w-7xl flex items-center justify-between px-6 h-16">
+          <Link href="/" className="text-xl font-bold text-accent">
+            ProPilot
+          </Link>
+          <div className="hidden md:flex items-center gap-8 text-sm text-fg-secondary">
+            <a href="#features" className="hover:text-fg-primary transition-colors">特徴</a>
+            <a href="#how" className="hover:text-fg-primary transition-colors">使い方</a>
+            <a href="#professionals" className="hover:text-fg-primary transition-colors">専門家</a>
+            <a href="#pricing" className="hover:text-fg-primary transition-colors">料金</a>
+            <a href="#faq" className="hover:text-fg-primary transition-colors">FAQ</a>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/app/dashboard" className="hidden sm:inline-flex text-sm text-fg-secondary hover:text-fg-primary transition-colors">
+              ログイン
+            </Link>
+            <Link href="/app/service" className="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-accent-hover transition-colors">
+              無料で始める
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Hero ── */}
+      <section className="relative bg-hero-bg pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(0,98,255,0.15),_transparent_60%)]" />
+        <div className="relative mx-auto max-w-7xl px-6 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-sm text-blue-200 mb-8">
+            <span className="inline-block h-2 w-2 rounded-full bg-success animate-pulse" />
+            3,200件以上のプロジェクトが ProPilot で完了しています
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight tracking-tight">
+            専門家チーム編成を、
+            <br />
+            <span className="text-accent">AIにおまかせ。</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+          <p className="mt-6 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            AIがあなたの課題に最適な専門家チームを自動編成。
+            <br className="hidden md:block" />
+            税理士・司法書士・弁護士・社労士をワンストップで。
+          </p>
+
+          {/* expert badges */}
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            {PROF.map((p) => (
+              <span
+                key={p.label}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur px-4 py-2 text-sm text-white border border-white/10"
+              >
+                <p.Icon className={`h-3.5 w-3.5 ${p.color}`} />
+                {p.label}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link
+              href="/app/service"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-8 py-4 text-base font-semibold text-white shadow-lg shadow-accent/25 hover:bg-accent-hover transition-all hover:-translate-y-0.5"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
+              無料で専門家チームを編成する
+              <ArrowRight className="h-4 w-4" />
+            </Link>
             <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              href="#how"
+              className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-white/20 px-8 py-4 text-base font-medium text-white hover:bg-white/5 transition-colors"
             >
-              Learning
-            </a>{" "}
-            center.
+              使い方を見る
+            </a>
+          </div>
+
+          <p className="mt-6 text-sm text-gray-400">
+            完全無料 · AIが最適チーム編成 · 個別契約で安心
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* ── Pain / 困った完結セクション ── */}
+      <section className="py-20 bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">Problem & Solution</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-fg-primary">
+              こんな「困った」ありませんか？
+            </h2>
+            <p className="mt-4 text-fg-secondary max-w-xl mx-auto">
+              複数の専門家が必要な課題こそ、ProPilotの出番です
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {PAIN_CARDS.map((c) => (
+              <div key={c.quote} className="rounded-2xl border border-border overflow-hidden">
+                <div className="bg-surface-secondary p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-6 w-6 rounded-full bg-accent/10 flex items-center justify-center">
+                      <span className="text-accent text-xs font-bold">Q</span>
+                    </div>
+                    <span className="text-xs text-fg-muted font-medium">お客様のお悩み</span>
+                  </div>
+                  <p className="text-lg font-bold text-fg-primary whitespace-pre-line leading-snug">
+                    {c.quote}
+                  </p>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-1.5 text-accent text-xs font-semibold mb-3">
+                    <ArrowDown className="h-3.5 w-3.5" />
+                    ProPilotが解決
+                  </div>
+                  <p className="text-sm font-semibold text-fg-primary whitespace-pre-line leading-snug">
+                    {c.solution}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    {c.tags.map((t) => (
+                      <span key={t.label} className="inline-flex items-center gap-1 text-xs font-medium bg-surface-secondary px-2.5 py-1 rounded-full">
+                        <t.Icon className={`h-3 w-3 ${t.color}`} />
+                        {t.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="py-16 bg-hero-bg">
+        <div className="mx-auto max-w-7xl px-6">
+          <p className="text-xs font-bold text-accent tracking-widest uppercase text-center mb-3">Numbers</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">数字で見るProPilot</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
+            {STATS.map((s) => (
+              <div key={s.label} className="text-center">
+                <p className="text-3xl md:text-4xl font-bold text-accent">{s.value}</p>
+                <p className="mt-1 text-sm text-gray-400">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Categories ── */}
+      <section id="features" className="py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              対応<span className="text-accent">サービス</span>
+            </h2>
+            <p className="mt-4 text-fg-secondary">6つの専門分野をワンストップでカバー</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {CATEGORIES.map((c) => (
+              <div key={c.title} className="group rounded-2xl border border-border p-6 hover:border-accent/30 hover:shadow-lg transition-all">
+                <c.Icon className={`h-7 w-7 ${c.iconColor}`} />
+                <h3 className="mt-3 text-lg font-bold text-fg-primary group-hover:text-accent transition-colors">
+                  {c.title}
+                </h3>
+                <p className="mt-2 text-sm text-fg-secondary leading-relaxed">{c.desc}</p>
+                <span className="mt-4 inline-block text-xs font-medium text-accent bg-accent-light rounded-full px-3 py-1">
+                  {c.experts}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trust bar ── */}
+      <section className="py-5 bg-surface-secondary border-y border-border">
+        <div className="mx-auto max-w-5xl px-6 flex flex-wrap items-center justify-center gap-10 text-sm text-fg-muted">
+          {TRUST_ITEMS.map((t) => (
+            <span key={t.text} className="flex items-center gap-2.5">
+              <t.Icon className="h-5 w-5 text-accent" />
+              {t.text}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section id="how" className="py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">How it works</p>
+            <h2 className="text-3xl md:text-4xl font-bold">4ステップで完了。</h2>
+          </div>
+          <div className="grid md:grid-cols-4 gap-6 px-0 md:px-12">
+            {STEPS.map((s) => (
+              <div key={s.num} className="relative text-center bg-surface-secondary rounded-2xl p-8">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-accent text-white text-xl font-bold">
+                  {s.num}
+                </div>
+                <h3 className="mt-5 text-lg font-bold text-fg-primary">{s.title}</h3>
+                <p className="mt-2 text-sm text-fg-secondary leading-relaxed whitespace-pre-line">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5 Professionals ── */}
+      <section id="professionals" className="py-20 bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">Professionals</p>
+            <h2 className="text-3xl md:text-4xl font-bold">5職種の専門家がワンストップで対応</h2>
+            <p className="mt-4 text-fg-secondary">あなたの課題に必要な専門家を、AIが自動で組み合わせます</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
+            {PROFESSIONALS.map((p) => (
+              <div key={p.label} className="bg-surface-secondary rounded-2xl p-6 text-center">
+                <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${p.bg}`}>
+                  <p.Icon className={`h-6 w-6 ${p.color}`} />
+                </div>
+                <h3 className="mt-4 text-base font-bold text-fg-primary">{p.label}</h3>
+                <p className="mt-2 text-xs text-fg-secondary leading-relaxed whitespace-pre-line">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="py-20 bg-surface-secondary">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">Testimonials</p>
+            <h2 className="text-3xl md:text-4xl font-bold">利用者の声。</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {TESTIMONIALS.map((t) => (
+              <div key={t.name} className="bg-white rounded-2xl p-8 border border-border">
+                <div className="flex gap-0.5 text-warning mb-4">
+                  {Array.from({ length: t.rating }).map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-current" />
+                  ))}
+                </div>
+                <p className="text-sm text-fg-secondary leading-relaxed">&ldquo;{t.text}&rdquo;</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-accent-light flex items-center justify-center text-accent font-bold text-sm">
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-fg-primary">{t.name}</p>
+                    <p className="text-xs text-fg-muted">{t.role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Comparison ── */}
+      <section className="py-20 bg-surface-secondary">
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">Comparison</p>
+            <h2 className="text-3xl md:text-4xl font-bold">従来の方法と何が違う？</h2>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-border bg-white">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-accent bg-surface-secondary">
+                  <th className="py-4 px-6 text-left text-fg-secondary font-medium">比較項目</th>
+                  <th className="py-4 px-6 text-center font-bold text-accent">ProPilot</th>
+                  <th className="py-4 px-6 text-center font-medium text-fg-muted">従来の方法</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON.map((r) => (
+                  <tr key={r.feature} className="border-b border-border last:border-0">
+                    <td className="py-4 px-6 text-fg-primary font-medium">{r.feature}</td>
+                    <td className="py-4 px-6 text-center font-semibold text-accent">{r.propilot}</td>
+                    <td className="py-4 px-6 text-center text-fg-muted">{r.others}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section id="faq" className="py-20 bg-surface-secondary">
+        <div className="mx-auto max-w-3xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">FAQ</p>
+            <h2 className="text-3xl md:text-4xl font-bold">よくある質問</h2>
+          </div>
+          <div className="space-y-4">
+            {FAQ_ITEMS.map((f) => (
+              <details key={f.q} className="group rounded-xl border border-border bg-white">
+                <summary className="flex cursor-pointer items-center justify-between px-6 py-5 text-fg-primary font-medium">
+                  {f.q}
+                  <span className="ml-4 text-fg-muted transition-transform group-open:rotate-45 text-xl leading-none">+</span>
+                </summary>
+                <div className="px-6 pb-5 text-sm text-fg-secondary leading-relaxed">{f.a}</div>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="py-20 bg-hero-bg">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white">
+            面倒な手続き、今日終わらせよう。
+          </h2>
+          <p className="mt-4 text-[#BFDBFE] text-lg">
+            AIが最適な専門家チームを自動編成。複雑な手続きもワンストップで。
+          </p>
+          <Link
+            href="/app/service"
+            className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-accent shadow-lg hover:bg-blue-50 transition-colors"
+          >
+            無料で専門家チームを編成する
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+          <p className="mt-4 text-sm text-[#93C5FD]">完全無料 · 最短30秒 · 個別契約で安心</p>
+        </div>
+      </section>
+
+      {/* ── Pricing ── */}
+      <section id="pricing" className="py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-14">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">Pricing</p>
+            <h2 className="text-3xl md:text-4xl font-bold">ご利用者様は完全無料</h2>
+            <p className="mt-4 text-fg-secondary max-w-xl mx-auto">
+              ProPilotは専門家側から掲載料をいただく仕組みです。ご利用者様の費用は一切かかりません。
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {PRICING_PLANS.map((p) => (
+              <div
+                key={p.name}
+                className={`rounded-2xl p-8 border-2 flex flex-col ${
+                  p.highlighted ? "border-accent shadow-lg shadow-accent/10 relative" : "border-border"
+                }`}
+              >
+                {p.highlighted && (
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-accent text-white text-xs font-bold px-4 py-1 rounded-full">
+                    おすすめ
+                  </span>
+                )}
+                <h3 className="text-lg font-bold text-fg-primary">{p.name}</h3>
+                <p className="text-sm text-fg-muted mt-1">{p.desc}</p>
+                <div className="mt-6">
+                  <span className="text-4xl font-bold text-fg-primary">{p.price}</span>
+                  {p.period && <span className="text-sm text-fg-muted">{p.period}</span>}
+                </div>
+                <ul className="mt-6 space-y-3 flex-1">
+                  {p.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-fg-secondary">
+                      <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/app/service"
+                  className={`mt-8 block text-center rounded-xl py-3 text-sm font-semibold transition-colors ${
+                    p.highlighted
+                      ? "bg-accent text-white hover:bg-accent-hover"
+                      : "bg-surface-secondary text-fg-primary hover:bg-border"
+                  }`}
+                >
+                  {p.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Security ── */}
+      <section className="py-20 bg-hero-bg">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-accent tracking-widest uppercase mb-3">Security & Trust</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white">安心してご利用いただくために</h2>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {SECURITY_CARDS.map((s) => (
+              <div key={s.title} className={`${s.cardBg} rounded-2xl p-8`}>
+                <div className={`h-12 w-12 rounded-xl ${s.iconBg} flex items-center justify-center`}>
+                  <s.Icon className={`h-5.5 w-5.5 ${s.iconColor}`} />
+                </div>
+                <h3 className="mt-4 text-base font-bold text-white">{s.title}</h3>
+                <p className="mt-2 text-sm text-[#94A3B8] leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="py-12 bg-[#0A1628] text-gray-400">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <p className="text-xl font-bold text-white">ProPilot</p>
+              <p className="mt-2 text-sm leading-relaxed">
+                AIが最適な専門家チームを
+                <br />
+                自動編成するプラットフォーム
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white mb-3">サービス</p>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#features" className="hover:text-white transition-colors">対応サービス</a></li>
+                <li><a href="#how" className="hover:text-white transition-colors">使い方</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">料金プラン</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white mb-3">サポート</p>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#faq" className="hover:text-white transition-colors">よくある質問</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">お問い合わせ</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">利用規約</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white mb-3">専門家の方へ</p>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="hover:text-white transition-colors">専門家登録</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">パートナー制度</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+            <p>&copy; 2025 ProPilot Inc. All rights reserved.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-white transition-colors">プライバシーポリシー</a>
+              <a href="#" className="hover:text-white transition-colors">特定商取引法に基づく表記</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }
